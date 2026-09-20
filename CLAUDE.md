@@ -28,10 +28,18 @@ para que qualquer conversa futura com o Claude Code retome o projeto sem precisa
   Usuário optou por **não fornecer a key agora**; ela deve ser adicionada no `.env` do backend
   quando disponível.
 - **Deploy (decidido pelo usuário):** Render (backend) + Vercel (frontend) + Neon (Postgres),
-  seguindo a sugestão do enunciado. Não uso ferramentas de MCP diretas para Render/Neon nesta
-  sessão (não disponíveis) — o usuário faz esses passos manualmente nos respectivos painéis.
-  Tenho ferramentas diretas de Vercel MCP disponíveis, então posso ajudar a fazer o deploy do
-  frontend por lá quando chegarmos nessa etapa (pedir confirmação antes de qualquer deploy real).
+  seguindo a sugestão do enunciado. **Já em produção (2026-09-20):**
+  - Frontend: https://eletrohub.vercel.app (Vercel, projeto `eletrohub`, conectado ao GitHub
+    `eduardo-timm/Eletro-Hub`, root directory `frontend`, deploy automático a cada push em `main`)
+  - Backend: https://eletro-hub.onrender.com (Render, root directory `backend`; plano free — hiberna
+    após inatividade, primeira requisição após um tempo parado pode demorar ~30s para "acordar")
+  - Banco: Neon (região sa-east-1), connection string em `backend/.env` (local) e nas env vars do
+    Render (produção)
+  - Repositório: https://github.com/eduardo-timm/Eletro-Hub (branch `main`)
+  - Fluxo de deploy usado: push no GitHub → Render faz redeploy automático do backend (Web Service
+    conectado ao repo) → para o frontend, deploy no Vercel é disparado manualmente via MCP
+    (`create_deployment` com `gitSource`) ou automaticamente se o Vercel também estiver com
+    auto-deploy habilitado no dashboard para pushes em `main`.
 
 ## Estrutura de pastas
 
@@ -137,10 +145,9 @@ Dentro do Claude Code, os dois servidores já estão configurados em `.claude/la
       gráficos (Recharts) populados com dados reais, resposta de interação pelo admin (muda status
       para "respondido"), envio de e-mail simulado (sem SMTP configurado), e cadastro de novo
       produto pela área admin. Tudo funcionou sem erros.
-- [ ] Deploy real no Render (backend), Vercel (frontend) — Neon já está pronto e em uso. O usuário
-      faz os passos manuais no Render; posso ajudar a finalizar o deploy do frontend no Vercel
-      usando as ferramentas de MCP diretas que tenho aqui, pedindo confirmação antes de qualquer
-      publicação real. Ver `README.md` para o passo a passo.
+- [x] **Deploy completo em produção (2026-09-20).** Render (backend) + Vercel (frontend) + Neon
+      (banco) publicados e testados via Browser pane em produção: home com produtos/destaques/IA,
+      login admin, dashboard com gráficos com dados reais. Ver seção "Deploy" acima para as URLs.
 - [ ] `ANTHROPIC_API_KEY` não configurada — usuário decidiu deixar para depois. A integração está
       pronta e funcional assim que a key for adicionada ao `.env` do backend (local) e às env vars
       do serviço no Render (produção). Testado e confirmado que o fallback funciona corretamente.

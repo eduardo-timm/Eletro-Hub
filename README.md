@@ -4,6 +4,14 @@ Sistema full-stack (Back-end + Front-end) de uma loja de eletrônicos, com área
 administrativa. Veja [CLAUDE.md](CLAUDE.md) para o mapeamento completo da arquitetura e decisões
 do projeto.
 
+## Em produção
+
+- **Site:** https://eletrohub.vercel.app
+- **API:** https://eletro-hub.onrender.com/api (plano free do Render — pode levar ~30s para
+  "acordar" na primeira requisição após um período sem uso)
+- Admin: `admin@eletrohub.com` / `admin123`
+- Cliente: `cliente@teste.com` / `cliente123`
+
 ## Stack
 
 - **Backend:** Node.js + Express + PostgreSQL (`pg`), JWT, bcrypt
