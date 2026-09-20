@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: eletrohub-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: PGSSL
+        value: "true"
+      - key: JWT_CLIENT_SECRET
+        sync: false
+      - key: JWT_ADMIN_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5
