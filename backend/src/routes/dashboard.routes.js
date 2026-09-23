@@ -1,11 +1,14 @@
 const express = require('express');
 const pool = require('../db/pool');
+const asyncHandler = require('../utils/asyncHandler');
 const { requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/overview', requireAdmin, async (_req, res) => {
-  try {
+router.get(
+  '/overview',
+  requireAdmin,
+  asyncHandler(async (_req, res) => {
     const [products, clients, interactions, byType, byStatus, byCategory, last30days, topRated] = await Promise.all([
       pool.query('SELECT COUNT(*)::int AS count FROM products'),
       pool.query('SELECT COUNT(*)::int AS count FROM clients'),
@@ -38,10 +41,7 @@ router.get('/overview', requireAdmin, async (_req, res) => {
       interactionsLast30Days: last30days.rows,
       topRatedProducts: topRated.rows
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao carregar dados do dashboard.' });
-  }
-});
+  })
+);
 
 module.exports = router;

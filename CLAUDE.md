@@ -19,8 +19,10 @@ para que qualquer conversa futura com o Claude Code retome o projeto sem precisa
 - **Frontend:** React + Vite + Tailwind CSS (visual propositalmente simples, sem design system
   pesado — o usuário pediu algo "básico porém bonito"). React Router para rotas, Recharts para
   os gráficos do dashboard admin, Axios para chamadas HTTP.
-- **Banco de dados:** PostgreSQL. Local/teste ainda não validado (sem Postgres/Docker na máquina
-  no momento da criação) — ver seção "Estado atual / pendências".
+- **Banco de dados:** PostgreSQL no Neon. Não há Postgres/Docker na máquina local, então o
+  backend local também aponta para o banco Neon **de produção** — testes locais que gravam dados
+  (criar produto, interação etc.) aparecem no site publicado. Prefira testes de leitura ou
+  idempotentes.
 - **IA (requisito 3):** integração real com a **Anthropic API (Claude)** já implementada em
   [backend/src/utils/ai.js](backend/src/utils/ai.js). Sem `ANTHROPIC_API_KEY` configurada, o
   endpoint responde de forma graciosa avisando que a integração está pronta mas sem credencial —
@@ -47,15 +49,21 @@ para que qualquer conversa futura com o Claude Code retome o projeto sem precisa
 backend/
   src/
     db/          schema.sql (DDL), pool.js (conexão pg), migrate.js, seed.js
-    middleware/  auth.js (requireClient, requireAdmin, optionalClient)
+    middleware/  auth.js (requireClient, requireAdmin — gerados por requireRole)
     routes/      auth.routes.js, products.routes.js, interactions.routes.js, dashboard.routes.js
-    utils/       jwt.js, ai.js (integração Anthropic), email.js (nodemailer com fallback simulado)
-    app.js, server.js
+    utils/       jwt.js, ai.js (integração Anthropic), email.js (nodemailer com fallback simulado),
+                 asyncHandler.js (repassa erros de handlers async ao middleware de erro)
+    app.js       monta rotas + middleware central de erro (mapeia códigos do Postgres para 4xx)
+    server.js
   render.yaml    config de deploy no Render
   .env.example
 
 frontend/
   src/
+    App.jsx                     rotas aninhadas: PublicLayout e AdminLayout com <Outlet />;
+                                 AdminDashboard carregado via React.lazy (isola o Recharts)
+    constants.js                rótulos de tipo/status de interação (espelham os CHECKs do schema)
+    utils/format.js             formatPrice, formatDateTime
     api/client.js               instância axios + helpers withClientAuth()/withAdminAuth()
     context/                    ClientAuthContext, AdminAuthContext (localStorage)
     components/                 Navbar, ProductCard, RatingStars, SearchBar, AIBadge,
@@ -79,6 +87,10 @@ frontend/
   scheduled_at, status, admin_response, responded_by fk admins, responded_at, created_at)`
 - View `product_ratings`: média e contagem de avaliações por produto (usada em listagens e no
   dashboard de "melhor avaliados").
+- Índice único parcial `uniq_review_per_client (product_id, client_id) WHERE type = 'avaliacao'`:
+  cada cliente avalia um produto só uma vez (propostas/agendamentos/reservas seguem ilimitados).
+  O backend traduz a violação em 409 "Voce ja avaliou este produto." e o `ProductDetail.jsx`
+  esconde o formulário de avaliação para quem já avaliou. Já aplicado no Neon em 2026-09-22.
 
 ## Requisitos do enunciado → onde foram implementados
 
@@ -86,7 +98,8 @@ frontend/
    [frontend/src/pages/Home.jsx](frontend/src/pages/Home.jsx)
 2. Pesquisa/filtro + botão "ver destaques" → `SearchBar.jsx` + `GET /api/products?q=&category=&destaque=true&sort=`
 3. Dados via IA exibidos na página principal, com indicação da origem →
-   `AIBadge.jsx` + `GET /api/products/:id/ai-insights` (cache de 7 dias em `ai_summary`)
+   `AIBadge.jsx` + `GET /api/products/:id/ai-insights` (cache de 7 dias em `ai_summary`; só
+   respostas reais da IA são cacheadas — o aviso "não configurada" e erros nunca entram no cache)
 4. Login/Cadastro de clientes → `POST /api/auth/register`, `POST /api/auth/login`
 5. Manter conectado com UUID no LocalStorage → `ClientAuthContext.jsx` salva `clientId` +
    `clientToken`; ao carregar, recupera o id e valida via `GET /api/auth/me`
@@ -102,7 +115,7 @@ frontend/
 11. Listagem de interações com responder/enviar e-mail/confirmar/excluir →
     `AdminInteractions.jsx` + `PUT /api/interactions/:id/respond`, `/status`,
     `POST /:id/send-email`, `DELETE /:id`
-12. Deploy na nuvem → pendente (ver abaixo)
+12. Deploy na nuvem → concluído (Render + Vercel + Neon, ver seção "Stack técnica")
 
 ## Contas de teste (criadas pelo `npm run db:seed`)
 
@@ -117,7 +130,7 @@ cd backend
 cp .env.example .env      # editar DATABASE_URL com a connection string do Postgres
 npm install
 npm run db:migrate        # cria as tabelas
-npm run db:seed           # popula com produtos/admin/cliente de exemplo
+npm run db:seed           # popula com produtos/admin/cliente de exemplo (idempotente)
 npm run dev                # http://localhost:4000
 
 # 2. Frontend (em outro terminal)
@@ -148,6 +161,11 @@ Dentro do Claude Code, os dois servidores já estão configurados em `.claude/la
 - [x] **Deploy completo em produção (2026-09-20).** Render (backend) + Vercel (frontend) + Neon
       (banco) publicados e testados via Browser pane em produção: home com produtos/destaques/IA,
       login admin, dashboard com gráficos com dados reais. Ver seção "Deploy" acima para as URLs.
+- [x] **Refatoração (2026-09-22)**: backend sem try/catch repetido (asyncHandler + middleware
+      central de erro), auth deduplicado, cache da IA corrigido, `?force=true` público removido do
+      endpoint de IA (evitava gasto de créditos por terceiros), seed idempotente; frontend com
+      tratamento de erro/retry nas telas, constantes e formatadores compartilhados, rotas aninhadas,
+      dashboard lazy-loaded (bundle principal 667 KB → 252 KB). Testado localmente contra o Neon.
 - [ ] `ANTHROPIC_API_KEY` não configurada — usuário decidiu deixar para depois. A integração está
       pronta e funcional assim que a key for adicionada ao `.env` do backend (local) e às env vars
       do serviço no Render (produção). Testado e confirmado que o fallback funciona corretamente.

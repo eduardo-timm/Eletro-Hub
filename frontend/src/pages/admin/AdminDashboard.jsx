@@ -15,6 +15,7 @@ import {
   Legend
 } from 'recharts';
 import api, { withAdminAuth } from '../../api/client';
+import { INTERACTION_STATUS, INTERACTION_TYPES } from '../../constants';
 
 const COLORS = ['#3b5cff', '#f5b301', '#22c55e', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -29,12 +30,23 @@ function StatCard({ label, value }) {
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    api.get('/dashboard/overview', withAdminAuth()).then((res) => setData(res.data));
+    api
+      .get('/dashboard/overview', withAdminAuth())
+      .then((res) => setData(res.data))
+      .catch(() => setError(true));
   }, []);
 
+  if (error) return <div className="p-8 text-red-600">Não foi possível carregar o dashboard.</div>;
   if (!data) return <div className="p-8">Carregando dashboard...</div>;
+
+  const byType = data.interactionsByType.map((d) => ({ ...d, label: INTERACTION_TYPES[d.type] ?? d.type }));
+  const byStatus = data.interactionsByStatus.map((d) => ({
+    ...d,
+    label: INTERACTION_STATUS[d.status]?.label ?? d.status
+  }));
 
   return (
     <div className="p-6 space-y-6">
@@ -50,9 +62,9 @@ export default function AdminDashboard() {
         <div className="card p-4">
           <h2 className="font-semibold text-sm mb-3">Interações por tipo</h2>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={data.interactionsByType}>
+            <BarChart data={byType}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="type" fontSize={12} />
+              <XAxis dataKey="label" fontSize={12} />
               <YAxis allowDecimals={false} fontSize={12} />
               <Tooltip />
               <Bar dataKey="count" fill="#3b5cff" radius={[4, 4, 0, 0]} />
@@ -64,8 +76,8 @@ export default function AdminDashboard() {
           <h2 className="font-semibold text-sm mb-3">Interações por status</h2>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={data.interactionsByStatus} dataKey="count" nameKey="status" outerRadius={90} label>
-                {data.interactionsByStatus.map((_, i) => (
+              <Pie data={byStatus} dataKey="count" nameKey="label" outerRadius={90} label>
+                {byStatus.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>

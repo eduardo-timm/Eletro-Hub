@@ -116,27 +116,34 @@ async function seed() {
     );
     const clientId = clientRes.rows[0].id;
 
-    const productIds = [];
-    for (const p of products) {
-      const res = await client.query(
-        `INSERT INTO products (name, brand, category, description, price, stock_quantity, image_url, specs, destaque)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-         RETURNING id`,
-        [p.name, p.brand, p.category, p.description, p.price, p.stock_quantity, p.image_url, p.specs, p.destaque]
-      );
-      productIds.push(res.rows[0].id);
-    }
+    // Produtos e interacoes nao tem chave natural unica; so insere se o catalogo estiver vazio
+    // para que rodar o seed de novo nao duplique tudo.
+    const { rows: countRows } = await client.query('SELECT COUNT(*)::int AS count FROM products');
+    if (countRows[0].count > 0) {
+      console.log(`Ja existem ${countRows[0].count} produtos - pulando produtos e interacoes de exemplo.`);
+    } else {
+      const productIds = [];
+      for (const p of products) {
+        const res = await client.query(
+          `INSERT INTO products (name, brand, category, description, price, stock_quantity, image_url, specs, destaque)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           RETURNING id`,
+          [p.name, p.brand, p.category, p.description, p.price, p.stock_quantity, p.image_url, p.specs, p.destaque]
+        );
+        productIds.push(res.rows[0].id);
+      }
 
-    await client.query(
-      `INSERT INTO interactions (product_id, client_id, type, message, rating, status)
-       VALUES ($1, $2, 'avaliacao', 'Produto excelente, superou minhas expectativas!', 5, 'respondido')`,
-      [productIds[0], clientId]
-    );
-    await client.query(
-      `INSERT INTO interactions (product_id, client_id, type, message, status)
-       VALUES ($1, $2, 'proposta', 'Consigo um desconto para pagamento a vista?', 'pendente')`,
-      [productIds[1], clientId]
-    );
+      await client.query(
+        `INSERT INTO interactions (product_id, client_id, type, message, rating, status)
+         VALUES ($1, $2, 'avaliacao', 'Produto excelente, superou minhas expectativas!', 5, 'respondido')`,
+        [productIds[0], clientId]
+      );
+      await client.query(
+        `INSERT INTO interactions (product_id, client_id, type, message, status)
+         VALUES ($1, $2, 'proposta', 'Consigo um desconto para pagamento a vista?', 'pendente')`,
+        [productIds[1], clientId]
+      );
+    }
 
     await client.query('COMMIT');
     console.log('Seed concluido com sucesso.');

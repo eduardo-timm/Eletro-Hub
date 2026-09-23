@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
 import RatingStars from './RatingStars';
-
-const formatPrice = (value) =>
-  Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatPrice } from '../utils/format';
 
 export default function ProductCard({ product }) {
   return (
     <Link to={`/produtos/${product.id}`} className="card overflow-hidden flex flex-col hover:shadow-md transition-shadow">
       <div className="relative aspect-[4/3] bg-slate-100">
-        {product.image_url && (
+        {product.image_url ? (
           <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl text-slate-300">🔌</div>
         )}
         {product.destaque && (
           <span className="absolute top-2 left-2 bg-amber-400 text-amber-950 text-xs font-semibold px-2 py-1 rounded-full">

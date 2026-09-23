@@ -60,6 +60,12 @@ CREATE INDEX IF NOT EXISTS idx_interactions_product ON interactions(product_id);
 CREATE INDEX IF NOT EXISTS idx_interactions_client ON interactions(client_id);
 CREATE INDEX IF NOT EXISTS idx_interactions_status ON interactions(status);
 
+-- Cada cliente pode avaliar um produto uma unica vez (evita distorcer a media).
+-- Propostas, agendamentos e reservas continuam ilimitados.
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_review_per_client
+  ON interactions(product_id, client_id)
+  WHERE type = 'avaliacao';
+
 -- View auxiliar: media de avaliacoes por produto
 CREATE OR REPLACE VIEW product_ratings AS
 SELECT product_id, ROUND(AVG(rating)::numeric, 2) AS avg_rating, COUNT(*) AS ratings_count

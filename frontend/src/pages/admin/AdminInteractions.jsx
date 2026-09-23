@@ -1,62 +1,65 @@
 import { useEffect, useState } from 'react';
 import api, { withAdminAuth } from '../../api/client';
+import { INTERACTION_STATUS, INTERACTION_TYPES } from '../../constants';
+import { formatDateTime, formatPrice } from '../../utils/format';
 
-const STATUS_OPTIONS = ['pendente', 'respondido', 'confirmado', 'cancelado'];
-const TYPE_LABELS = { proposta: 'Proposta', avaliacao: 'Avaliação', agendamento: 'Agendamento', reserva: 'Reserva' };
+function StatusOptions() {
+  return Object.entries(INTERACTION_STATUS).map(([value, { label }]) => (
+    <option key={value} value={value}>
+      {label}
+    </option>
+  ));
+}
 
 function InteractionRow({ interaction, onChanged }) {
   const [response, setResponse] = useState(interaction.admin_response || '');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
 
-  async function respond() {
-    setBusy(true);
-    try {
-      await api.put(`/interactions/${interaction.id}/respond`, { admin_response: response }, withAdminAuth());
-      onChanged();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function setStatus(status) {
-    setBusy(true);
-    try {
-      await api.put(`/interactions/${interaction.id}/status`, { status }, withAdminAuth());
-      onChanged();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function sendEmail() {
+  async function run(action) {
     setBusy(true);
     setNotice(null);
     try {
-      const res = await api.post(`/interactions/${interaction.id}/send-email`, {}, withAdminAuth());
-      setNotice(res.data.simulated ? 'E-mail simulado (configure SMTP no backend para envio real).' : 'E-mail enviado!');
+      await action();
+    } catch (err) {
+      setNotice(err.response?.data?.error || 'Erro ao executar a ação.');
     } finally {
       setBusy(false);
     }
   }
 
-  async function remove() {
+  const respond = () =>
+    run(async () => {
+      await api.put(`/interactions/${interaction.id}/respond`, { admin_response: response }, withAdminAuth());
+      onChanged();
+    });
+
+  const setStatus = (status) =>
+    run(async () => {
+      await api.put(`/interactions/${interaction.id}/status`, { status }, withAdminAuth());
+      onChanged();
+    });
+
+  const sendEmail = () =>
+    run(async () => {
+      const res = await api.post(`/interactions/${interaction.id}/send-email`, {}, withAdminAuth());
+      setNotice(res.data.simulated ? 'E-mail simulado (configure SMTP no backend para envio real).' : 'E-mail enviado!');
+    });
+
+  const remove = () => {
     if (!confirm('Excluir esta interação?')) return;
-    setBusy(true);
-    try {
+    run(async () => {
       await api.delete(`/interactions/${interaction.id}`, withAdminAuth());
       onChanged();
-    } finally {
-      setBusy(false);
-    }
-  }
+    });
+  };
 
   return (
     <div className="card p-4 space-y-2">
       <div className="flex justify-between items-start gap-3 flex-wrap">
         <div>
           <span className="text-xs text-slate-500">
-            {TYPE_LABELS[interaction.type]} · {interaction.product_name}
+            {INTERACTION_TYPES[interaction.type]} · {interaction.product_name}
           </span>
           <p className="font-medium text-slate-800">
             {interaction.client_name} <span className="text-slate-400 font-normal">({interaction.client_email})</span>
@@ -68,21 +71,17 @@ function InteractionRow({ interaction, onChanged }) {
           disabled={busy}
           className="input w-auto text-xs"
         >
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
+          <StatusOptions />
         </select>
       </div>
 
       {interaction.rating && <p className="text-sm">Nota: {interaction.rating} ★</p>}
       {interaction.message && <p className="text-sm text-slate-600">"{interaction.message}"</p>}
       {interaction.proposed_price && (
-        <p className="text-sm text-slate-600">Valor proposto: R$ {Number(interaction.proposed_price).toLocaleString('pt-BR')}</p>
+        <p className="text-sm text-slate-600">Valor proposto: {formatPrice(interaction.proposed_price)}</p>
       )}
       {interaction.scheduled_at && (
-        <p className="text-sm text-slate-600">Agendado para: {new Date(interaction.scheduled_at).toLocaleString('pt-BR')}</p>
+        <p className="text-sm text-slate-600">Agendado para: {formatDateTime(interaction.scheduled_at)}</p>
       )}
 
       <textarea
@@ -105,7 +104,7 @@ function InteractionRow({ interaction, onChanged }) {
         </button>
       </div>
       {notice && <p className="text-xs text-slate-500">{notice}</p>}
-      <p className="text-xs text-slate-400">{new Date(interaction.created_at).toLocaleString('pt-BR')}</p>
+      <p className="text-xs text-slate-400">{formatDateTime(interaction.created_at)}</p>
     </div>
   );
 }
@@ -114,6 +113,7 @@ export default function AdminInteractions() {
   const [interactions, setInteractions] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     load();
@@ -121,10 +121,12 @@ export default function AdminInteractions() {
 
   function load() {
     setLoading(true);
-    api.get('/interactions', { ...withAdminAuth(), params: statusFilter ? { status: statusFilter } : {} }).then((res) => {
-      setInteractions(res.data.interactions);
-      setLoading(false);
-    });
+    setError(null);
+    api
+      .get('/interactions', { ...withAdminAuth(), params: statusFilter ? { status: statusFilter } : {} })
+      .then((res) => setInteractions(res.data.interactions))
+      .catch(() => setError('Não foi possível carregar as interações.'))
+      .finally(() => setLoading(false));
   }
 
   return (
@@ -133,16 +135,14 @@ export default function AdminInteractions() {
         <h1 className="text-2xl font-bold text-slate-900">Interações dos clientes</h1>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto">
           <option value="">Todos os status</option>
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
+          <StatusOptions />
         </select>
       </div>
 
       {loading ? (
         <p className="text-slate-500">Carregando...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
       ) : interactions.length === 0 ? (
         <p className="text-slate-500">Nenhuma interação encontrada.</p>
       ) : (

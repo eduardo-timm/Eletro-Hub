@@ -1,4 +1,5 @@
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
@@ -11,94 +12,39 @@ import Register from './pages/Register';
 import MyInteractions from './pages/MyInteractions';
 
 import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminProductForm from './pages/admin/AdminProductForm';
 import AdminInteractions from './pages/admin/AdminInteractions';
 
-function PublicLayout({ children }) {
+// Carregado sob demanda: o Recharts e a maior dependencia do bundle e so o admin usa.
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+
+function PublicLayout() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      {children}
+      <Outlet />
     </div>
   );
 }
 
-function AdminLayout({ children }) {
+function AdminLayout() {
   return (
     <div className="min-h-screen flex">
       <AdminSidebar />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1">
+        <Suspense fallback={<div className="p-8">Carregando...</div>}>
+          <Outlet />
+        </Suspense>
+      </div>
     </div>
   );
 }
 
 export default function App() {
-  const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
-
-  if (isAdmin) {
-    return (
-      <Routes>
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/produtos"
-          element={
-            <AdminRoute>
-              <AdminLayout>
-                <AdminProducts />
-              </AdminLayout>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/produtos/novo"
-          element={
-            <AdminRoute>
-              <AdminLayout>
-                <AdminProductForm />
-              </AdminLayout>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/produtos/:id/editar"
-          element={
-            <AdminRoute>
-              <AdminLayout>
-                <AdminProductForm />
-              </AdminLayout>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/interacoes"
-          element={
-            <AdminRoute>
-              <AdminLayout>
-                <AdminInteractions />
-              </AdminLayout>
-            </AdminRoute>
-          }
-        />
-      </Routes>
-    );
-  }
-
   return (
-    <PublicLayout>
-      <Routes>
+    <Routes>
+      <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/produtos/:id" element={<ProductDetail />} />
         <Route path="/login" element={<Login />} />
@@ -111,7 +57,25 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
-    </PublicLayout>
+      </Route>
+
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="produtos" element={<AdminProducts />} />
+        <Route path="produtos/novo" element={<AdminProductForm />} />
+        <Route path="produtos/:id/editar" element={<AdminProductForm />} />
+        <Route path="interacoes" element={<AdminInteractions />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

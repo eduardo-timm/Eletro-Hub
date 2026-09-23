@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api, { withAdminAuth } from '../../api/client';
-
-const formatPrice = (value) => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatPrice } from '../../utils/format';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -14,16 +13,21 @@ export default function AdminProducts() {
 
   function load() {
     setLoading(true);
-    api.get('/products').then((res) => {
-      setProducts(res.data.products);
-      setLoading(false);
-    });
+    api
+      .get('/products')
+      .then((res) => setProducts(res.data.products))
+      .catch(() => alert('Não foi possível carregar os produtos.'))
+      .finally(() => setLoading(false));
   }
 
   async function remove(id) {
     if (!confirm('Excluir este produto? Essa ação não pode ser desfeita.')) return;
-    await api.delete(`/products/${id}`, withAdminAuth());
-    load();
+    try {
+      await api.delete(`/products/${id}`, withAdminAuth());
+      load();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Erro ao excluir produto.');
+    }
   }
 
   return (
