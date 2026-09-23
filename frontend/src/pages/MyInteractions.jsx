@@ -20,14 +20,14 @@ export default function MyInteractions() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Minhas interações</h1>
+      <h1 className="text-2xl font-bold text-neutral-900 mb-6">Minhas interações</h1>
 
       {loading ? (
-        <p className="text-slate-500">Carregando...</p>
+        <p className="text-neutral-700">Carregando...</p>
       ) : error ? (
-        <p className="text-red-600">{error}</p>
+        <p className="text-error">{error}</p>
       ) : interactions.length === 0 ? (
-        <p className="text-slate-500">Você ainda não interagiu com nenhum produto.</p>
+        <p className="text-neutral-700">Você ainda não interagiu com nenhum produto.</p>
       ) : (
         <div className="space-y-4">
           {interactions.map((i) => {
@@ -36,10 +36,10 @@ export default function MyInteractions() {
               <div key={i.id} className="card p-4">
                 <div className="flex justify-between items-start gap-3">
                   <div>
-                    <span className="text-xs text-slate-500">{INTERACTION_TYPES[i.type]}</span>
+                    <span className="text-xs text-neutral-500">{INTERACTION_TYPES[i.type]}</span>
                     <Link
                       to={`/produtos/${i.product_id}`}
-                      className="block font-semibold text-slate-800 hover:text-brand-700"
+                      className="block font-semibold text-neutral-800 hover:text-brand-700"
                     >
                       {i.product_name}
                     </Link>
@@ -52,22 +52,22 @@ export default function MyInteractions() {
                     <RatingStars value={i.rating} />
                   </div>
                 )}
-                {i.message && <p className="text-sm text-slate-600 mt-2">"{i.message}"</p>}
+                {i.message && <p className="text-sm text-neutral-600 mt-2">"{i.message}"</p>}
                 {i.proposed_price && (
-                  <p className="text-sm text-slate-600 mt-1">Valor proposto: {formatPrice(i.proposed_price)}</p>
+                  <p className="text-sm text-neutral-600 mt-1">Valor proposto: {formatPrice(i.proposed_price)}</p>
                 )}
                 {i.scheduled_at && (
-                  <p className="text-sm text-slate-600 mt-1">Data agendada: {formatDateTime(i.scheduled_at)}</p>
+                  <p className="text-sm text-neutral-600 mt-1">Data agendada: {formatDateTime(i.scheduled_at)}</p>
                 )}
 
                 {i.admin_response && (
-                  <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm">
-                    <span className="font-medium text-slate-700">Resposta da loja:</span>
-                    <p className="text-slate-600 mt-1">{i.admin_response}</p>
+                  <div className="mt-3 bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-sm">
+                    <span className="font-medium text-neutral-700">Resposta da loja:</span>
+                    <p className="text-neutral-600 mt-1">{i.admin_response}</p>
                   </div>
                 )}
 
-                <p className="text-xs text-slate-400 mt-2">{formatDateTime(i.created_at)}</p>
+                <p className="text-xs text-neutral-400 mt-2">{formatDateTime(i.created_at)}</p>
               </div>
             );
           })}

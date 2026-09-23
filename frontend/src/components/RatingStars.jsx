@@ -7,7 +7,7 @@ export default function RatingStars({ value = 0, size = 'text-base', onChange })
           key={s}
           onClick={onChange ? () => onChange(s) : undefined}
           className={onChange ? 'cursor-pointer' : ''}
-          style={{ color: s <= Math.round(value) ? '#f5b301' : '#d1d5db' }}
+          style={{ color: s <= Math.round(value) ? '#000000' : '#d4d4d4' }}
         >
           ★
         </span>

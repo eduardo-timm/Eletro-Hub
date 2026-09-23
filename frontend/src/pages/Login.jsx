@@ -26,16 +26,16 @@ export default function Login() {
 
   return (
     <div className="max-w-sm mx-auto px-4 py-16">
-      <h1 className="text-2xl font-bold text-slate-900 mb-1">Entrar</h1>
-      <p className="text-sm text-slate-500 mb-6">Acesse sua conta para interagir com os produtos.</p>
+      <h1 className="text-2xl font-bold text-neutral-900 mb-1">Entrar</h1>
+      <p className="text-sm text-neutral-700 mb-6">Acesse sua conta para interagir com os produtos.</p>
 
       <form onSubmit={submit} className="card p-5 space-y-3">
         <div>
-          <label className="text-xs font-medium text-slate-500">E-mail</label>
+          <label className="text-xs font-medium text-neutral-500">E-mail</label>
           <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
-          <label className="text-xs font-medium text-slate-500">Senha</label>
+          <label className="text-xs font-medium text-neutral-500">Senha</label>
           <input
             className="input"
             type="password"
@@ -44,19 +44,19 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-error">{error}</p>}
         <button type="submit" disabled={loading} className="btn-primary w-full">
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
 
-      <p className="text-sm text-slate-500 mt-4 text-center">
+      <p className="text-sm text-neutral-700 mt-4 text-center">
         Não tem conta?{' '}
         <Link to="/cadastro" className="text-brand-600 font-medium hover:underline">
           Cadastre-se
         </Link>
       </p>
-      <p className="text-xs text-slate-400 mt-6 text-center">
+      <p className="text-xs text-neutral-600 mt-6 text-center">
         Conta de teste: cliente@teste.com / cliente123
       </p>
     </div>

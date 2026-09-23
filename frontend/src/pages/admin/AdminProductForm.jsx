@@ -70,54 +70,54 @@ export default function AdminProductForm() {
 
   return (
     <div className="p-6 max-w-2xl">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">{isEdit ? 'Editar produto' : 'Novo produto'}</h1>
+      <h1 className="text-2xl font-bold text-neutral-900 mb-6">{isEdit ? 'Editar produto' : 'Novo produto'}</h1>
 
       <form onSubmit={submit} className="card p-5 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium text-slate-500">Nome</label>
+            <label className="text-xs font-medium text-neutral-500">Nome</label>
             <input className="input" required value={form.name} onChange={update('name')} />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-500">Marca</label>
+            <label className="text-xs font-medium text-neutral-500">Marca</label>
             <input className="input" value={form.brand} onChange={update('brand')} />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium text-slate-500">Categoria</label>
+            <label className="text-xs font-medium text-neutral-500">Categoria</label>
             <input className="input" required value={form.category} onChange={update('category')} />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-500">URL da imagem</label>
+            <label className="text-xs font-medium text-neutral-500">URL da imagem</label>
             <input className="input" value={form.image_url} onChange={update('image_url')} />
           </div>
         </div>
 
         <div>
-          <label className="text-xs font-medium text-slate-500">Descrição</label>
+          <label className="text-xs font-medium text-neutral-500">Descrição</label>
           <textarea className="input" rows={3} value={form.description} onChange={update('description')} />
         </div>
 
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="text-xs font-medium text-slate-500">Preço (R$)</label>
+            <label className="text-xs font-medium text-neutral-500">Preço (R$)</label>
             <input className="input" type="number" min="0" step="0.01" required value={form.price} onChange={update('price')} />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-500">Estoque</label>
+            <label className="text-xs font-medium text-neutral-500">Estoque</label>
             <input className="input" type="number" min="0" value={form.stock_quantity} onChange={update('stock_quantity')} />
           </div>
           <div className="flex items-center gap-2 pt-6">
             <input id="destaque" type="checkbox" checked={form.destaque} onChange={update('destaque')} />
-            <label htmlFor="destaque" className="text-sm text-slate-600">
+            <label htmlFor="destaque" className="text-sm text-neutral-600">
               Produto em destaque
             </label>
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-error">{error}</p>}
 
         <div className="flex gap-2">
           <button type="submit" disabled={saving} className="btn-primary">

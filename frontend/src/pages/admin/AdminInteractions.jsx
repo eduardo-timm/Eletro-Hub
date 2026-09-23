@@ -58,11 +58,11 @@ function InteractionRow({ interaction, onChanged }) {
     <div className="card p-4 space-y-2">
       <div className="flex justify-between items-start gap-3 flex-wrap">
         <div>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-neutral-500">
             {INTERACTION_TYPES[interaction.type]} · {interaction.product_name}
           </span>
-          <p className="font-medium text-slate-800">
-            {interaction.client_name} <span className="text-slate-400 font-normal">({interaction.client_email})</span>
+          <p className="font-medium text-neutral-800">
+            {interaction.client_name} <span className="text-neutral-400 font-normal">({interaction.client_email})</span>
           </p>
         </div>
         <select
@@ -76,12 +76,12 @@ function InteractionRow({ interaction, onChanged }) {
       </div>
 
       {interaction.rating && <p className="text-sm">Nota: {interaction.rating} ★</p>}
-      {interaction.message && <p className="text-sm text-slate-600">"{interaction.message}"</p>}
+      {interaction.message && <p className="text-sm text-neutral-600">"{interaction.message}"</p>}
       {interaction.proposed_price && (
-        <p className="text-sm text-slate-600">Valor proposto: {formatPrice(interaction.proposed_price)}</p>
+        <p className="text-sm text-neutral-600">Valor proposto: {formatPrice(interaction.proposed_price)}</p>
       )}
       {interaction.scheduled_at && (
-        <p className="text-sm text-slate-600">Agendado para: {formatDateTime(interaction.scheduled_at)}</p>
+        <p className="text-sm text-neutral-600">Agendado para: {formatDateTime(interaction.scheduled_at)}</p>
       )}
 
       <textarea
@@ -99,12 +99,12 @@ function InteractionRow({ interaction, onChanged }) {
         <button onClick={sendEmail} disabled={busy} className="btn-secondary text-sm">
           Enviar por e-mail
         </button>
-        <button onClick={remove} disabled={busy} className="text-red-600 text-sm hover:underline">
+        <button onClick={remove} disabled={busy} className="text-neutral-500 text-sm hover:text-black hover:underline">
           Excluir
         </button>
       </div>
-      {notice && <p className="text-xs text-slate-500">{notice}</p>}
-      <p className="text-xs text-slate-400">{formatDateTime(interaction.created_at)}</p>
+      {notice && <p className="text-xs text-neutral-500">{notice}</p>}
+      <p className="text-xs text-neutral-400">{formatDateTime(interaction.created_at)}</p>
     </div>
   );
 }
@@ -132,7 +132,7 @@ export default function AdminInteractions() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-slate-900">Interações dos clientes</h1>
+        <h1 className="text-2xl font-bold text-neutral-900">Interações dos clientes</h1>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input w-auto">
           <option value="">Todos os status</option>
           <StatusOptions />
@@ -140,11 +140,11 @@ export default function AdminInteractions() {
       </div>
 
       {loading ? (
-        <p className="text-slate-500">Carregando...</p>
+        <p className="text-neutral-700">Carregando...</p>
       ) : error ? (
-        <p className="text-red-600">{error}</p>
+        <p className="text-error">{error}</p>
       ) : interactions.length === 0 ? (
-        <p className="text-slate-500">Nenhuma interação encontrada.</p>
+        <p className="text-neutral-700">Nenhuma interação encontrada.</p>
       ) : (
         <div className="space-y-3">
           {interactions.map((i) => (

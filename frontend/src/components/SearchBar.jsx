@@ -13,7 +13,7 @@ export default function SearchBar({ categories, onSearch, onShowDestaques }) {
   return (
     <form onSubmit={submit} className="card p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
       <div className="flex-1">
-        <label className="text-xs font-medium text-slate-500">Buscar</label>
+        <label className="text-xs font-medium text-neutral-500">Buscar</label>
         <input
           className="input"
           placeholder="Nome, marca ou categoria..."
@@ -23,7 +23,7 @@ export default function SearchBar({ categories, onSearch, onShowDestaques }) {
       </div>
 
       <div>
-        <label className="text-xs font-medium text-slate-500">Categoria</label>
+        <label className="text-xs font-medium text-neutral-500">Categoria</label>
         <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">Todas</option>
           {categories.map((c) => (
@@ -35,7 +35,7 @@ export default function SearchBar({ categories, onSearch, onShowDestaques }) {
       </div>
 
       <div>
-        <label className="text-xs font-medium text-slate-500">Ordenar por</label>
+        <label className="text-xs font-medium text-neutral-500">Ordenar por</label>
         <select className="input" value={sort} onChange={(e) => setSort(e.target.value)}>
           <option value="recentes">Mais recentes</option>
           <option value="avaliados">Melhor avaliados</option>
@@ -58,7 +58,7 @@ export default function SearchBar({ categories, onSearch, onShowDestaques }) {
           }}
           className="btn-secondary whitespace-nowrap"
         >
-          ⭐ Ver destaques
+          ★ Ver destaques
         </button>
       </div>
     </form>

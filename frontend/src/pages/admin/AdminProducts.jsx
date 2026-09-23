@@ -33,18 +33,18 @@ export default function AdminProducts() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Produtos</h1>
+        <h1 className="text-2xl font-bold text-neutral-900">Produtos</h1>
         <Link to="/admin/produtos/novo" className="btn-primary">
           + Novo produto
         </Link>
       </div>
 
       {loading ? (
-        <p className="text-slate-500">Carregando...</p>
+        <p className="text-neutral-700">Carregando...</p>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-slate-500">
+            <thead className="bg-neutral-50 text-left text-neutral-500">
               <tr>
                 <th className="p-3">Produto</th>
                 <th className="p-3">Categoria</th>
@@ -55,14 +55,14 @@ export default function AdminProducts() {
                 <th className="p-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-neutral-100">
               {products.map((p) => (
                 <tr key={p.id}>
-                  <td className="p-3 font-medium text-slate-800">{p.name}</td>
-                  <td className="p-3 text-slate-500">{p.category}</td>
+                  <td className="p-3 font-medium text-neutral-800">{p.name}</td>
+                  <td className="p-3 text-neutral-500">{p.category}</td>
                   <td className="p-3">{formatPrice(p.price)}</td>
                   <td className="p-3">{p.stock_quantity}</td>
-                  <td className="p-3">{p.destaque ? '⭐' : '—'}</td>
+                  <td className="p-3">{p.destaque ? '★' : '—'}</td>
                   <td className="p-3">
                     {p.avg_rating || 0} ★ ({p.ratings_count || 0})
                   </td>
@@ -70,7 +70,7 @@ export default function AdminProducts() {
                     <Link to={`/admin/produtos/${p.id}/editar`} className="text-brand-600 hover:underline">
                       Editar
                     </Link>
-                    <button onClick={() => remove(p.id)} className="text-red-600 hover:underline">
+                    <button onClick={() => remove(p.id)} className="text-neutral-500 hover:text-black hover:underline">
                       Excluir
                     </button>
                   </td>

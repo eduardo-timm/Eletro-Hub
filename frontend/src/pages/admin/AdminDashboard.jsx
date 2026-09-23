@@ -17,13 +17,14 @@ import {
 import api, { withAdminAuth } from '../../api/client';
 import { INTERACTION_STATUS, INTERACTION_TYPES } from '../../constants';
 
-const COLORS = ['#3b5cff', '#f5b301', '#22c55e', '#ef4444', '#8b5cf6', '#06b6d4'];
+// Tons de cinza bem espacados para as fatias continuarem distinguiveis sem cor.
+const COLORS = ['#000000', '#737373', '#d4d4d4', '#404040', '#a3a3a3', '#e5e5e5'];
 
 function StatCard({ label, value }) {
   return (
     <div className="card p-4">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-xs text-neutral-500">{label}</p>
+      <p className="text-2xl font-bold text-neutral-900">{value}</p>
     </div>
   );
 }
@@ -39,7 +40,7 @@ export default function AdminDashboard() {
       .catch(() => setError(true));
   }, []);
 
-  if (error) return <div className="p-8 text-red-600">Não foi possível carregar o dashboard.</div>;
+  if (error) return <div className="p-8 text-error">Não foi possível carregar o dashboard.</div>;
   if (!data) return <div className="p-8">Carregando dashboard...</div>;
 
   const byType = data.interactionsByType.map((d) => ({ ...d, label: INTERACTION_TYPES[d.type] ?? d.type }));
@@ -50,7 +51,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Visão geral do sistema</h1>
+      <h1 className="text-2xl font-bold text-neutral-900">Visão geral do sistema</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Produtos cadastrados" value={data.totals.products} />
@@ -67,7 +68,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="label" fontSize={12} />
               <YAxis allowDecimals={false} fontSize={12} />
               <Tooltip />
-              <Bar dataKey="count" fill="#3b5cff" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#000000" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -95,7 +96,7 @@ export default function AdminDashboard() {
               <XAxis type="number" allowDecimals={false} fontSize={12} />
               <YAxis type="category" dataKey="category" width={100} fontSize={12} />
               <Tooltip />
-              <Bar dataKey="count" fill="#22c55e" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill="#525252" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -108,7 +109,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="day" fontSize={10} />
               <YAxis allowDecimals={false} fontSize={12} />
               <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#f5b301" strokeWidth={2} />
+              <Line type="monotone" dataKey="count" stroke="#000000" strokeWidth={2} dot={{ fill: '#000000' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -116,11 +117,11 @@ export default function AdminDashboard() {
 
       <div className="card p-4">
         <h2 className="font-semibold text-sm mb-3">Top 5 produtos mais bem avaliados</h2>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-neutral-100">
           {data.topRatedProducts.map((p) => (
             <li key={p.name} className="py-2 flex justify-between text-sm">
               <span>{p.name}</span>
-              <span className="text-slate-500">
+              <span className="text-neutral-500">
                 {p.avg_rating} ★ ({p.ratings_count} avaliações)
               </span>
             </li>

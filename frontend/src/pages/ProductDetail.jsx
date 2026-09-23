@@ -102,7 +102,7 @@ export default function ProductDetail() {
   if (loadError) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-10 space-y-2">
-        <p className="text-slate-700">Não foi possível carregar este produto.</p>
+        <p className="text-neutral-700">Não foi possível carregar este produto.</p>
         <Link to="/" className="text-brand-600 font-medium hover:underline">
           Voltar para a loja
         </Link>
@@ -117,30 +117,30 @@ export default function ProductDetail() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden">
+        <div className="aspect-[4/3] bg-white rounded-xl overflow-hidden">
           {product.image_url ? (
             <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl text-slate-300">🔌</div>
+            <div className="w-full h-full flex items-center justify-center text-neutral-400">Sem imagem</div>
           )}
         </div>
         <div>
-          <span className="text-xs text-slate-500">{product.category}</span>
-          <h1 className="text-2xl font-bold text-slate-900">{product.name}</h1>
-          <p className="text-slate-500 text-sm mb-2">{product.brand}</p>
+          <span className="text-xs uppercase tracking-wide text-neutral-600">{product.category}</span>
+          <h1 className="text-2xl font-bold text-neutral-900">{product.name}</h1>
+          <p className="text-neutral-700 text-sm mb-2">{product.brand}</p>
           <div className="flex items-center gap-2 mb-3">
             <RatingStars value={product.avg_rating} />
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-neutral-700">
               {product.avg_rating || 0} ({product.ratings_count || 0} avaliações)
             </span>
           </div>
-          <p className="text-slate-700 mb-4">{product.description}</p>
+          <p className="text-neutral-700 mb-4">{product.description}</p>
           <div className="text-2xl font-bold text-brand-700 mb-4">{formatPrice(product.price)}</div>
 
           {product.specs && Object.keys(product.specs).length > 0 && (
             <div className="card p-4 mb-4">
               <h3 className="font-semibold text-sm mb-2">Especificações</h3>
-              <ul className="text-sm text-slate-600 space-y-1">
+              <ul className="text-sm text-neutral-600 space-y-1">
                 {Object.entries(product.specs).map(([k, v]) => (
                   <li key={k}>
                     <strong className="capitalize">{k.replace(/_/g, ' ')}:</strong> {String(v)}
@@ -155,10 +155,10 @@ export default function ProductDetail() {
       <AIBadge insights={aiInsights} loading={aiLoading} />
 
       <div className="card p-5">
-        <h2 className="font-semibold text-slate-800 mb-3">Interagir com este produto</h2>
+        <h2 className="font-semibold text-neutral-800 mb-3">Interagir com este produto</h2>
 
         {!client ? (
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-neutral-600">
             Você precisa estar logado para interagir com este produto.{' '}
             <Link to="/login" className="text-brand-600 font-medium hover:underline">
               Fazer login
@@ -178,7 +178,7 @@ export default function ProductDetail() {
                   type="button"
                   onClick={() => setType(value)}
                   className={`px-3 py-1.5 rounded-full text-sm border ${
-                    type === value ? 'bg-brand-600 text-white border-brand-600' : 'bg-white border-slate-300 text-slate-600'
+                    type === value ? 'bg-brand-600 text-white border-brand-600' : 'bg-white border-neutral-300 text-neutral-600'
                   }`}
                 >
                   {label}
@@ -188,14 +188,14 @@ export default function ProductDetail() {
 
             {type === 'avaliacao' && !reviewBlocked && (
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1">Sua nota</label>
+                <label className="text-xs font-medium text-neutral-500 block mb-1">Sua nota</label>
                 <RatingStars value={rating} size="text-2xl" onChange={setRating} />
               </div>
             )}
 
             {type === 'proposta' && (
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1">Valor proposto (R$)</label>
+                <label className="text-xs font-medium text-neutral-500 block mb-1">Valor proposto (R$)</label>
                 <input
                   className="input"
                   type="number"
@@ -209,7 +209,7 @@ export default function ProductDetail() {
 
             {type === 'agendamento' && (
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1">Data/hora desejada</label>
+                <label className="text-xs font-medium text-neutral-500 block mb-1">Data/hora desejada</label>
                 <input
                   className="input"
                   type="datetime-local"
@@ -220,7 +220,7 @@ export default function ProductDetail() {
             )}
 
             {reviewBlocked ? (
-              <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p className="text-sm text-neutral-600 bg-neutral-50 border border-neutral-200 rounded-lg p-3">
                 Você já avaliou este produto. Veja sua avaliação em{' '}
                 <Link to="/minhas-interacoes" className="text-brand-600 font-medium hover:underline">
                   Minhas interações
@@ -229,13 +229,15 @@ export default function ProductDetail() {
               </p>
             ) : (
               <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1">Mensagem</label>
+                <label className="text-xs font-medium text-neutral-500 block mb-1">Mensagem</label>
                 <textarea className="input" rows={3} value={message} onChange={(e) => setMessage(e.target.value)} />
               </div>
             )}
 
             {feedback && (
-              <p className={`text-sm ${feedback.ok ? 'text-green-600' : 'text-red-600'}`}>{feedback.text}</p>
+              <p className={feedback.ok ? 'text-sm text-neutral-700' : 'text-error'}>
+                {feedback.ok ? `✓ ${feedback.text}` : feedback.text}
+              </p>
             )}
 
             {!reviewBlocked && (

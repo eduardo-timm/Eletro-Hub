@@ -6,9 +6,10 @@ export const INTERACTION_TYPES = {
   reserva: 'Reserva'
 };
 
+// Tema monocromatico: os status se diferenciam por contorno, preenchimento e risco, nao por cor.
 export const INTERACTION_STATUS = {
-  pendente: { label: 'Pendente', color: 'bg-amber-100 text-amber-800' },
-  respondido: { label: 'Respondido', color: 'bg-blue-100 text-blue-800' },
-  confirmado: { label: 'Confirmado', color: 'bg-green-100 text-green-800' },
-  cancelado: { label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+  pendente: { label: 'Pendente', color: 'bg-white text-neutral-900 border border-neutral-900' },
+  respondido: { label: 'Respondido', color: 'bg-neutral-200 text-neutral-900' },
+  confirmado: { label: 'Confirmado', color: 'bg-black text-white' },
+  cancelado: { label: 'Cancelado', color: 'bg-neutral-100 text-neutral-400 line-through' }
 };

@@ -183,8 +183,18 @@ Dentro do Claude Code, os dois servidores já estão configurados em `.claude/la
 ## Preferências e decisões do usuário (não perguntar de novo)
 
 - Layout deve ser **simples e básico, mas bonito** — evitar telas complexas ou muitos componentes
-  visuais. Manter a paleta Tailwind `brand` (azul) já definida em `frontend/tailwind.config.js`.
-  Isso está satisfeito atualmente — não sofisticar o design a menos que o usuário peça.
+  visuais. Não sofisticar o design a menos que o usuário peça.
+- **Tema monocromático (pedido do usuário em 2026-09-22):** só preto, branco e cinzas — nenhuma
+  cor de destaque (nem para erro/sucesso/status). Detalhes:
+  - Fundo da página cinza médio (`bg-neutral-300` no `body`, em `frontend/src/index.css`); cards
+    brancos por cima. Textos direto sobre o fundo usam `neutral-600/700` (400/500 ficam ilegíveis).
+  - Navbar e sidebar admin pretas, com o componente `Logo.jsx` (sem emoji).
+  - Paleta `brand` em `tailwind.config.js` é uma escala de cinza/preto; use a família `neutral`
+    (não `slate`, que é azulado).
+  - Erros usam a classe `.text-error` (peso + borda lateral preta) em vez de vermelho; status de
+    interação se diferenciam por contorno/preenchimento/risco (`constants.js`); gráficos em cinzas.
+  - Emojis coloridos foram trocados por símbolos monocromáticos (★, "IA"). Fotos dos produtos
+    continuam coloridas (são conteúdo, não tema).
 - Deploy target é explicitamente **Render + Vercel + Neon** (não Supabase), mesmo tendo ferramentas
   de Supabase disponíveis nesta sessão — não trocar sem confirmar com o usuário.
 - IA: manter a integração real com Anthropic (não trocar de provedor) a menos que o usuário peça.

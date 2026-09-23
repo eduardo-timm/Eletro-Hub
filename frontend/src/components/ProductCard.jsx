@@ -4,27 +4,30 @@ import { formatPrice } from '../utils/format';
 
 export default function ProductCard({ product }) {
   return (
-    <Link to={`/produtos/${product.id}`} className="card overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-      <div className="relative aspect-[4/3] bg-slate-100">
+    <Link
+      to={`/produtos/${product.id}`}
+      className="card overflow-hidden flex flex-col hover:shadow-md hover:border-neutral-400 transition"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
         {product.image_url ? (
           <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl text-slate-300">🔌</div>
+          <div className="w-full h-full flex items-center justify-center text-sm text-neutral-400">Sem imagem</div>
         )}
         {product.destaque && (
-          <span className="absolute top-2 left-2 bg-amber-400 text-amber-950 text-xs font-semibold px-2 py-1 rounded-full">
-            ⭐ Destaque
+          <span className="absolute top-2 left-2 bg-black text-white text-xs font-semibold px-2 py-1 rounded-full">
+            ★ Destaque
           </span>
         )}
       </div>
       <div className="p-4 flex flex-col gap-1 flex-1">
-        <span className="text-xs text-slate-500">{product.category}</span>
-        <h3 className="font-semibold text-slate-800 leading-snug">{product.name}</h3>
+        <span className="text-xs uppercase tracking-wide text-neutral-500">{product.category}</span>
+        <h3 className="font-semibold text-neutral-900 leading-snug">{product.name}</h3>
         <div className="flex items-center gap-1 text-sm">
           <RatingStars value={product.avg_rating} size="text-sm" />
-          <span className="text-slate-400 text-xs">({product.ratings_count || 0})</span>
+          <span className="text-neutral-400 text-xs">({product.ratings_count || 0})</span>
         </div>
-        <div className="mt-auto pt-2 font-bold text-brand-700">{formatPrice(product.price)}</div>
+        <div className="mt-auto pt-2 font-bold text-black">{formatPrice(product.price)}</div>
       </div>
     </Link>
   );
