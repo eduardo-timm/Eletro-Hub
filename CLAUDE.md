@@ -24,7 +24,7 @@ para que qualquer conversa futura com o Claude Code retome o projeto sem precisa
   (criar produto, interação etc.) aparecem no site publicado. Prefira testes de leitura ou
   idempotentes.
 - **IA (requisito 3):** integração real com a **Google Gemini API** (trocada de Anthropic para
-  Gemini a pedido do usuário em 2026-10-01; modelo em `GEMINI_MODEL`, padrão `gemini-flash-latest`)
+  Gemini a pedido do usuário em 2026-10-01; modelo em `GEMINI_MODEL`, padrão `gemini-flash-lite-latest`)
   em [backend/src/utils/ai.js](backend/src/utils/ai.js). Sem `GEMINI_API_KEY` configurada, o
   endpoint responde de forma graciosa avisando que a integração está pronta mas sem credencial —
   o front-end já indica claramente a origem dos dados ("Dados obtidos por consulta à IA").

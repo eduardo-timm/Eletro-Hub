@@ -30,7 +30,7 @@ Descricao: ${product.description || 'sem descricao'}
 Especificacoes: ${JSON.stringify(product.specs || {})}`;
 
   try {
-    const model = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+    const model = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
     const res = await fetch(`${GEMINI_URL}/${model}:generateContent`, {
       method: 'POST',
       headers: {
