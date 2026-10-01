@@ -1,20 +1,20 @@
-// Integracao com a API da Anthropic (Claude) para enriquecer os produtos
-// com dados adicionais. Funciona de verdade assim que ANTHROPIC_API_KEY
+// Integracao com a API do Google Gemini para enriquecer os produtos
+// com dados adicionais. Funciona de verdade assim que GEMINI_API_KEY
 // for definida no .env; sem a key, devolve um resultado "nao configurado"
 // para que o front-end ainda mostre, de forma transparente, de onde os
 // dados viriam.
 
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 async function fetchAiInsights(product) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     return {
       configured: false,
       source: 'IA (nao configurada)',
       generated_at: new Date().toISOString(),
-      curiosidade: 'Integracao com IA pronta no backend. Defina ANTHROPIC_API_KEY no .env para gerar dados reais para este produto.',
+      curiosidade: 'Integracao com IA pronta no backend. Defina GEMINI_API_KEY no .env para gerar dados reais para este produto.',
       dica_de_uso: null,
       publico_indicado: null
     };
@@ -30,33 +30,32 @@ Descricao: ${product.description || 'sem descricao'}
 Especificacoes: ${JSON.stringify(product.specs || {})}`;
 
   try {
-    const res = await fetch(ANTHROPIC_URL, {
+    const model = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+    const res = await fetch(`${GEMINI_URL}/${model}:generateContent`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'x-goog-api-key': apiKey
       },
       body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
-        max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }]
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 400, responseMimeType: 'application/json' }
       })
     });
 
     if (!res.ok) {
       const errText = await res.text();
-      throw new Error(`Anthropic API respondeu ${res.status}: ${errText}`);
+      throw new Error(`Gemini API respondeu ${res.status}: ${errText}`);
     }
 
     const data = await res.json();
-    const text = data?.content?.[0]?.text || '{}';
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
 
     return {
       configured: true,
-      source: 'Anthropic Claude API',
+      source: 'Google Gemini API',
       generated_at: new Date().toISOString(),
       curiosidade: parsed.curiosidade || null,
       dica_de_uso: parsed.dica_de_uso || null,
@@ -65,7 +64,7 @@ Especificacoes: ${JSON.stringify(product.specs || {})}`;
   } catch (err) {
     return {
       configured: true,
-      source: 'Anthropic Claude API (erro na chamada)',
+      source: 'Google Gemini API (erro na chamada)',
       generated_at: new Date().toISOString(),
       erro: err.message,
       curiosidade: null,

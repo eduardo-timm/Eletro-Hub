@@ -23,8 +23,9 @@ para que qualquer conversa futura com o Claude Code retome o projeto sem precisa
   backend local também aponta para o banco Neon **de produção** — testes locais que gravam dados
   (criar produto, interação etc.) aparecem no site publicado. Prefira testes de leitura ou
   idempotentes.
-- **IA (requisito 3):** integração real com a **Anthropic API (Claude)** já implementada em
-  [backend/src/utils/ai.js](backend/src/utils/ai.js). Sem `ANTHROPIC_API_KEY` configurada, o
+- **IA (requisito 3):** integração real com a **Google Gemini API** (trocada de Anthropic para
+  Gemini a pedido do usuário em 2026-10-01; modelo em `GEMINI_MODEL`, padrão `gemini-flash-latest`)
+  em [backend/src/utils/ai.js](backend/src/utils/ai.js). Sem `GEMINI_API_KEY` configurada, o
   endpoint responde de forma graciosa avisando que a integração está pronta mas sem credencial —
   o front-end já indica claramente a origem dos dados ("Dados obtidos por consulta à IA").
   Usuário optou por **não fornecer a key agora**; ela deve ser adicionada no `.env` do backend
@@ -51,7 +52,7 @@ backend/
     db/          schema.sql (DDL), pool.js (conexão pg), migrate.js, seed.js
     middleware/  auth.js (requireClient, requireAdmin — gerados por requireRole)
     routes/      auth.routes.js, products.routes.js, interactions.routes.js, dashboard.routes.js
-    utils/       jwt.js, ai.js (integração Anthropic), email.js (nodemailer com fallback simulado),
+    utils/       jwt.js, ai.js (integração Gemini), email.js (nodemailer com fallback simulado),
                  asyncHandler.js (repassa erros de handlers async ao middleware de erro)
     app.js       monta rotas + middleware central de erro (mapeia códigos do Postgres para 4xx)
     server.js
@@ -166,7 +167,7 @@ Dentro do Claude Code, os dois servidores já estão configurados em `.claude/la
       endpoint de IA (evitava gasto de créditos por terceiros), seed idempotente; frontend com
       tratamento de erro/retry nas telas, constantes e formatadores compartilhados, rotas aninhadas,
       dashboard lazy-loaded (bundle principal 667 KB → 252 KB). Testado localmente contra o Neon.
-- [ ] `ANTHROPIC_API_KEY` não configurada — usuário decidiu deixar para depois. A integração está
+- [ ] `GEMINI_API_KEY` não configurada (provedor trocado para Gemini em 2026-10-01). A integração está
       pronta e funcional assim que a key for adicionada ao `.env` do backend (local) e às env vars
       do serviço no Render (produção). Testado e confirmado que o fallback funciona corretamente.
 - [ ] SMTP não configurado — "enviar e-mail" do admin funciona mas fica em modo simulado (loga no
@@ -197,4 +198,5 @@ Dentro do Claude Code, os dois servidores já estão configurados em `.claude/la
     continuam coloridas (são conteúdo, não tema).
 - Deploy target é explicitamente **Render + Vercel + Neon** (não Supabase), mesmo tendo ferramentas
   de Supabase disponíveis nesta sessão — não trocar sem confirmar com o usuário.
-- IA: manter a integração real com Anthropic (não trocar de provedor) a menos que o usuário peça.
+- IA: usar o **Google Gemini** (usuário pediu a troca de Anthropic para Gemini em 2026-10-01); não
+  trocar de provedor de novo a menos que o usuário peça.

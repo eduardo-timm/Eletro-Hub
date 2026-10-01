@@ -17,7 +17,7 @@ do projeto.
 - **Backend:** Node.js + Express + PostgreSQL (`pg`), JWT, bcrypt
 - **Frontend:** React + Vite + Tailwind CSS + React Router + Recharts
 - **Banco:** PostgreSQL (Neon)
-- **IA:** Anthropic API (Claude) para dados adicionais dos produtos
+- **IA:** Google Gemini API para dados adicionais dos produtos
 
 ## Rodando localmente
 
@@ -73,7 +73,7 @@ npm run dev              # http://localhost:5173
    - Start command: `npm start`
 3. Configure as variáveis de ambiente no painel do Render (mesmas do `.env.example`):
    `DATABASE_URL`, `PGSSL=true`, `JWT_CLIENT_SECRET`, `JWT_ADMIN_SECRET`, `FRONTEND_URL`
-   (URL do Vercel, definida no passo seguinte), `ANTHROPIC_API_KEY` (opcional).
+   (URL do Vercel, definida no passo seguinte), `GEMINI_API_KEY` (opcional).
 4. Após o deploy, rode as migrações apontando para o banco do Render/Neon:
    ```bash
    DATABASE_URL="sua-connection-string" npm run db:migrate --prefix backend
