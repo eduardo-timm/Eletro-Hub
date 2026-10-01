@@ -102,7 +102,8 @@ frontend/
    [frontend/src/pages/Home.jsx](frontend/src/pages/Home.jsx)
 2. Pesquisa/filtro + botão "ver destaques" → `SearchBar.jsx` + `GET /api/products?q=&category=&destaque=true&sort=`
 3. Integração com IA → geração de descrição de produto via Gemini no `AdminProductForm.jsx`
-   (`POST /api/products/ai-description`). O bloco de IA na página principal foi removido a pedido
+   (botão `POST /api/products/ai-description`; e ao criar produto com descrição vazia, o
+   `POST /api/products` gera a descrição automaticamente — se a IA falhar, cria sem descrição). O bloco de IA na página principal foi removido a pedido
    do usuário em 2026-10-01 (ver seção "Stack técnica").
 4. Login/Cadastro de clientes → `POST /api/auth/register`, `POST /api/auth/login`
 5. Manter conectado com UUID no LocalStorage → `ClientAuthContext.jsx` salva `clientId` +

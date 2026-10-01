@@ -126,7 +126,13 @@ export default function AdminProductForm() {
               {generating ? 'Gerando...' : 'Gerar com IA'}
             </button>
           </div>
-          <textarea className="input" rows={4} value={form.description} onChange={update('description')} />
+          <textarea
+            className="input"
+            rows={4}
+            value={form.description}
+            onChange={update('description')}
+            placeholder={isEdit ? '' : 'Deixe em branco para a IA gerar a descrição ao salvar.'}
+          />
           {aiError && <p className="text-error mt-1">{aiError}</p>}
         </div>
 
@@ -151,7 +157,7 @@ export default function AdminProductForm() {
 
         <div className="flex gap-2">
           <button type="submit" disabled={saving} className="btn-primary">
-            {saving ? 'Salvando...' : 'Salvar'}
+            {saving ? (!isEdit && !form.description ? 'Salvando e gerando descrição...' : 'Salvando...') : 'Salvar'}
           </button>
           <button type="button" onClick={() => navigate('/admin/produtos')} className="btn-secondary">
             Cancelar

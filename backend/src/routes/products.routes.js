@@ -89,6 +89,15 @@ router.post(
       return res.status(400).json({ error: 'Nome, categoria e preco sao obrigatorios.' });
     }
 
+    // Sem descricao informada, tenta gerar uma com a IA; se a IA falhar, o produto e criado sem ela.
+    let finalDescription = description;
+    if (!finalDescription) {
+      finalDescription = await generateDescription({ name, brand, category }).catch((err) => {
+        console.error('Falha ao gerar descricao com IA:', err.message);
+        return null;
+      });
+    }
+
     const { rows } = await pool.query(
       `INSERT INTO products (name, brand, category, description, price, stock_quantity, image_url, specs, destaque)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
@@ -96,7 +105,7 @@ router.post(
         name,
         brand || null,
         category,
-        description || null,
+        finalDescription || null,
         price,
         stock_quantity || 0,
         image_url || null,
