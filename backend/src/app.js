@@ -43,6 +43,8 @@ app.use((err, _req, res, _next) => {
   }
   const known = PG_ERRORS[err.code];
   if (known) return res.status(known[0]).json({ error: known[1] });
+  // Erros criados com status + expose (ex.: utils/ai.js) ja trazem mensagem segura para o cliente.
+  if (err.expose && err.status) return res.status(err.status).json({ error: err.message });
 
   console.error(err);
   res.status(500).json({ error: 'Erro interno do servidor.' });

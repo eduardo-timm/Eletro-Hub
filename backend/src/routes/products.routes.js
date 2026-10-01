@@ -2,11 +2,9 @@ const express = require('express');
 const pool = require('../db/pool');
 const asyncHandler = require('../utils/asyncHandler');
 const { requireAdmin } = require('../middleware/auth');
-const { fetchAiInsights } = require('../utils/ai');
+const { generateDescription } = require('../utils/ai');
 
 const router = express.Router();
-
-const AI_CACHE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const BASE_SELECT = `
   SELECT p.*, COALESCE(r.avg_rating, 0) AS avg_rating, COALESCE(r.ratings_count, 0) AS ratings_count
@@ -67,34 +65,20 @@ router.get(
   })
 );
 
-// Dados adicionais obtidos via consulta a IA, com cache de 7 dias no banco.
-router.get(
-  '/:id/ai-insights',
+// ---- Rotas administrativas ----
+
+// Gera uma descricao do produto via IA (Gemini) para o admin revisar antes de salvar.
+// Fica restrita ao admin para que terceiros nao consumam a cota da API.
+router.post(
+  '/ai-description',
+  requireAdmin,
   asyncHandler(async (req, res) => {
-    const { rows } = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
-    const product = rows[0];
-    if (!product) return res.status(404).json({ error: 'Produto nao encontrado.' });
-
-    // So respostas reais da IA contam como cache; avisos de "nao configurada" ou erros
-    // precisam ser refeitos, senao continuariam aparecendo depois que a key for configurada.
-    const summary = product.ai_summary;
-    const cacheAge = product.ai_updated_at ? Date.now() - new Date(product.ai_updated_at).getTime() : Infinity;
-    if (summary?.configured && !summary.erro && cacheAge < AI_CACHE_MS) {
-      return res.json({ insights: summary, cached: true });
-    }
-
-    const insights = await fetchAiInsights(product);
-    if (insights.configured && !insights.erro) {
-      await pool.query('UPDATE products SET ai_summary = $1, ai_updated_at = now() WHERE id = $2', [
-        insights,
-        product.id
-      ]);
-    }
-    res.json({ insights, cached: false });
+    const { name, brand, category, description } = req.body;
+    if (!name) return res.status(400).json({ error: 'Informe o nome do produto para gerar a descricao.' });
+    const text = await generateDescription({ name, brand, category, description });
+    res.json({ description: text, source: 'Google Gemini API' });
   })
 );
-
-// ---- Rotas administrativas ----
 
 router.post(
   '/',

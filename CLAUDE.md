@@ -25,11 +25,14 @@ para que qualquer conversa futura com o Claude Code retome o projeto sem precisa
   idempotentes.
 - **IA (requisito 3):** integração real com a **Google Gemini API** (trocada de Anthropic para
   Gemini a pedido do usuário em 2026-10-01; modelo em `GEMINI_MODEL`, padrão `gemini-flash-lite-latest`)
-  em [backend/src/utils/ai.js](backend/src/utils/ai.js). Sem `GEMINI_API_KEY` configurada, o
-  endpoint responde de forma graciosa avisando que a integração está pronta mas sem credencial —
-  o front-end já indica claramente a origem dos dados ("Dados obtidos por consulta à IA").
-  Usuário optou por **não fornecer a key agora**; ela deve ser adicionada no `.env` do backend
-  quando disponível.
+  em [backend/src/utils/ai.js](backend/src/utils/ai.js). **Uso atual (pedido do usuário em
+  2026-10-01):** a IA serve só para **gerar a descrição do produto** no formulário do admin (botão
+  "Gerar com IA" → `POST /api/products/ai-description`, restrito a admin). O antigo bloco de
+  "curiosidade/dica/público" da IA na Home e no detalhe do produto (`AIBadge`, `GET /:id/ai-insights`)
+  foi **removido** a pedido do usuário — não recolocar. As colunas `ai_summary`/`ai_updated_at`
+  continuam no schema, sem uso. Sem `GEMINI_API_KEY`, o endpoint responde 503 com mensagem clara.
+  Modelos Flash "cheios" (`gemini-flash-latest`) davam 503 por alta demanda e `gemini-2.5-flash`
+  já foi descontinuado; por isso o padrão é o Lite.
 - **Deploy (decidido pelo usuário):** Render (backend) + Vercel (frontend) + Neon (Postgres),
   seguindo a sugestão do enunciado. **Já em produção (2026-09-20):**
   - Frontend: https://eletrohub.vercel.app (Vercel, projeto `eletrohub`, conectado ao GitHub
@@ -67,7 +70,7 @@ frontend/
     utils/format.js             formatPrice, formatDateTime
     api/client.js               instância axios + helpers withClientAuth()/withAdminAuth()
     context/                    ClientAuthContext, AdminAuthContext (localStorage)
-    components/                 Navbar, ProductCard, RatingStars, SearchBar, AIBadge,
+    components/                 Navbar, ProductCard, RatingStars, SearchBar,
                                  ProtectedRoute, AdminRoute, AdminSidebar
     pages/                      Home, ProductDetail, Login, Register, MyInteractions
     pages/admin/                AdminLogin, AdminDashboard, AdminProducts, AdminProductForm,
@@ -98,9 +101,9 @@ frontend/
 1. Dados da tabela principal na página do cliente (destaques, últimos, melhor avaliados) →
    [frontend/src/pages/Home.jsx](frontend/src/pages/Home.jsx)
 2. Pesquisa/filtro + botão "ver destaques" → `SearchBar.jsx` + `GET /api/products?q=&category=&destaque=true&sort=`
-3. Dados via IA exibidos na página principal, com indicação da origem →
-   `AIBadge.jsx` + `GET /api/products/:id/ai-insights` (cache de 7 dias em `ai_summary`; só
-   respostas reais da IA são cacheadas — o aviso "não configurada" e erros nunca entram no cache)
+3. Integração com IA → geração de descrição de produto via Gemini no `AdminProductForm.jsx`
+   (`POST /api/products/ai-description`). O bloco de IA na página principal foi removido a pedido
+   do usuário em 2026-10-01 (ver seção "Stack técnica").
 4. Login/Cadastro de clientes → `POST /api/auth/register`, `POST /api/auth/login`
 5. Manter conectado com UUID no LocalStorage → `ClientAuthContext.jsx` salva `clientId` +
    `clientToken`; ao carregar, recupera o id e valida via `GET /api/auth/me`
@@ -167,9 +170,10 @@ Dentro do Claude Code, os dois servidores já estão configurados em `.claude/la
       endpoint de IA (evitava gasto de créditos por terceiros), seed idempotente; frontend com
       tratamento de erro/retry nas telas, constantes e formatadores compartilhados, rotas aninhadas,
       dashboard lazy-loaded (bundle principal 667 KB → 252 KB). Testado localmente contra o Neon.
-- [ ] `GEMINI_API_KEY` não configurada (provedor trocado para Gemini em 2026-10-01). A integração está
-      pronta e funcional assim que a key for adicionada ao `.env` do backend (local) e às env vars
-      do serviço no Render (produção). Testado e confirmado que o fallback funciona corretamente.
+- [ ] `GEMINI_API_KEY`: usuário gerou a key em 2026-10-01 (testada e funcionando com
+      `gemini-flash-lite-latest`), mas ela precisa ser adicionada **pelo usuário** nas env vars do
+      serviço no Render (não há acesso ao Render nesta sessão). Esta pasta local (ZIP) não tem
+      `backend/.env`.
 - [ ] SMTP não configurado — "enviar e-mail" do admin funciona mas fica em modo simulado (loga no
       console do backend) até que `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS` sejam preenchidos. Testado e
       confirmado que o modo simulado funciona corretamente.

@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import api from '../api/client';
 import ProductCard from '../components/ProductCard';
 import SearchBar from '../components/SearchBar';
-import AIBadge from '../components/AIBadge';
 
 const RECENT = { params: { sort: 'recentes' }, title: 'Últimos cadastrados' };
 const DESTAQUES = { params: { destaque: 'true' }, title: '★ Produtos em destaque' };
@@ -14,9 +12,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [view, setView] = useState(RECENT);
-  const [aiProduct, setAiProduct] = useState(null);
-  const [aiInsights, setAiInsights] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     api
@@ -24,7 +19,6 @@ export default function Home() {
       .then((res) => setCategories(res.data.categories))
       .catch(() => {});
     loadProducts(RECENT);
-    loadAiHighlight();
   }, []);
 
   async function loadProducts(nextView) {
@@ -41,23 +35,6 @@ export default function Home() {
     }
   }
 
-  // Requisito 3: a pagina principal exibe dados obtidos via IA para o produto melhor avaliado.
-  async function loadAiHighlight() {
-    try {
-      const res = await api.get('/products', { params: { sort: 'avaliados' } });
-      const best = res.data.products.find((p) => Number(p.ratings_count) > 0) || res.data.products[0];
-      if (!best) return;
-      setAiProduct(best);
-      setAiLoading(true);
-      const insightsRes = await api.get(`/products/${best.id}/ai-insights`);
-      setAiInsights(insightsRes.data.insights);
-    } catch {
-      setAiInsights(null);
-    } finally {
-      setAiLoading(false);
-    }
-  }
-
   function search({ q, category, sort }) {
     loadProducts({
       params: { q: q || undefined, category: category || undefined, sort },
@@ -71,18 +48,6 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-neutral-900">Eletrônicos com o melhor custo-benefício</h1>
         <p className="text-neutral-700 mt-2">Explore, avalie, reserve e negocie diretamente com a nossa loja.</p>
       </section>
-
-      {aiProduct && (aiLoading || aiInsights) && (
-        <section>
-          <p className="text-xs text-neutral-600 mb-1">
-            Em destaque na página principal —{' '}
-            <Link to={`/produtos/${aiProduct.id}`} className="hover:underline">
-              {aiProduct.name}
-            </Link>
-          </p>
-          <AIBadge insights={aiInsights} loading={aiLoading} />
-        </section>
-      )}
 
       <SearchBar categories={categories} onSearch={search} onShowDestaques={() => loadProducts(DESTAQUES)} />
 

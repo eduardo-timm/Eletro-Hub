@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import api, { withClientAuth } from '../api/client';
 import { useClientAuth } from '../context/ClientAuthContext';
 import RatingStars from '../components/RatingStars';
-import AIBadge from '../components/AIBadge';
 import { formatPrice } from '../utils/format';
 
 const ACTION_LABELS = {
@@ -18,8 +17,6 @@ export default function ProductDetail() {
   const { client } = useClientAuth();
   const [product, setProduct] = useState(null);
   const [loadError, setLoadError] = useState(false);
-  const [aiInsights, setAiInsights] = useState(null);
-  const [aiLoading, setAiLoading] = useState(true);
   const [type, setType] = useState('proposta');
   const [message, setMessage] = useState('');
   const [rating, setRating] = useState(5);
@@ -33,7 +30,6 @@ export default function ProductDetail() {
     setProduct(null);
     setLoadError(false);
     loadProduct();
-    loadInsights();
   }, [id]);
 
   // O banco aceita uma avaliacao por cliente/produto; checar antes evita preencher o formulario a toa.
@@ -54,18 +50,6 @@ export default function ProductDetail() {
       setProduct(res.data.product);
     } catch {
       setLoadError(true);
-    }
-  }
-
-  async function loadInsights() {
-    setAiLoading(true);
-    try {
-      const res = await api.get(`/products/${id}/ai-insights`);
-      setAiInsights(res.data.insights);
-    } catch {
-      setAiInsights(null);
-    } finally {
-      setAiLoading(false);
     }
   }
 
@@ -151,8 +135,6 @@ export default function ProductDetail() {
           )}
         </div>
       </div>
-
-      <AIBadge insights={aiInsights} loading={aiLoading} />
 
       <div className="card p-5">
         <h2 className="font-semibold text-neutral-800 mb-3">Interagir com este produto</h2>

@@ -17,7 +17,7 @@ do projeto.
 - **Backend:** Node.js + Express + PostgreSQL (`pg`), JWT, bcrypt
 - **Frontend:** React + Vite + Tailwind CSS + React Router + Recharts
 - **Banco:** PostgreSQL (Neon)
-- **IA:** Google Gemini API para dados adicionais dos produtos
+- **IA:** Google Gemini API para gerar a descrição dos produtos (área admin)
 
 ## Rodando localmente
 

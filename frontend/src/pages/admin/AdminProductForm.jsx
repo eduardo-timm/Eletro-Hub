@@ -21,6 +21,8 @@ export default function AdminProductForm() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [aiError, setAiError] = useState(null);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -45,6 +47,22 @@ export default function AdminProductForm() {
       const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
       setForm((f) => ({ ...f, [field]: value }));
     };
+  }
+
+  // Pede ao backend (Gemini) uma descricao com base no nome/marca/categoria ja preenchidos;
+  // o texto entra no campo para o admin revisar antes de salvar.
+  async function generateDescription() {
+    setAiError(null);
+    setGenerating(true);
+    try {
+      const { name, brand, category, description } = form;
+      const res = await api.post('/products/ai-description', { name, brand, category, description }, withAdminAuth());
+      setForm((f) => ({ ...f, description: res.data.description }));
+    } catch (err) {
+      setAiError(err.response?.data?.error || 'Erro ao gerar descrição com IA.');
+    } finally {
+      setGenerating(false);
+    }
   }
 
   async function submit(e) {
@@ -96,8 +114,20 @@ export default function AdminProductForm() {
         </div>
 
         <div>
-          <label className="text-xs font-medium text-neutral-500">Descrição</label>
-          <textarea className="input" rows={3} value={form.description} onChange={update('description')} />
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-medium text-neutral-500">Descrição</label>
+            <button
+              type="button"
+              onClick={generateDescription}
+              disabled={generating || !form.name}
+              title={form.name ? 'Gera uma descrição com IA (Google Gemini)' : 'Preencha o nome primeiro'}
+              className="text-xs font-medium text-neutral-700 hover:underline disabled:opacity-50 disabled:no-underline"
+            >
+              {generating ? 'Gerando...' : 'Gerar com IA'}
+            </button>
+          </div>
+          <textarea className="input" rows={4} value={form.description} onChange={update('description')} />
+          {aiError && <p className="text-error mt-1">{aiError}</p>}
         </div>
 
         <div className="grid grid-cols-3 gap-3">

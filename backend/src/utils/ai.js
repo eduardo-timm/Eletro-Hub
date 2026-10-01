@@ -1,77 +1,53 @@
-// Integracao com a API do Google Gemini para enriquecer os produtos
-// com dados adicionais. Funciona de verdade assim que GEMINI_API_KEY
-// for definida no .env; sem a key, devolve um resultado "nao configurado"
-// para que o front-end ainda mostre, de forma transparente, de onde os
-// dados viriam.
+// Integracao com a API do Google Gemini para gerar a descricao de um produto
+// a partir do nome/marca/categoria. Usada pelo botao "Gerar com IA" do
+// formulario de produto do admin. Sem GEMINI_API_KEY no .env, lanca um erro
+// com status 503 explicando que a integracao esta pronta mas sem credencial.
 
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-async function fetchAiInsights(product) {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    return {
-      configured: false,
-      source: 'IA (nao configurada)',
-      generated_at: new Date().toISOString(),
-      curiosidade: 'Integracao com IA pronta no backend. Defina GEMINI_API_KEY no .env para gerar dados reais para este produto.',
-      dica_de_uso: null,
-      publico_indicado: null
-    };
-  }
-
-  const prompt = `Voce e um assistente de uma loja de eletronicos. Para o produto abaixo, gere um JSON (somente o JSON, sem texto extra) com os campos:
-- "curiosidade": uma curiosidade tecnica breve e verdadeira sobre esse tipo de produto (1-2 frases)
-- "dica_de_uso": uma dica pratica de uso ou cuidado com o produto (1 frase)
-- "publico_indicado": para qual tipo de usuario esse produto e mais indicado (1 frase curta)
-
-Produto: ${product.name} (marca ${product.brand || 'generica'}, categoria ${product.category})
-Descricao: ${product.description || 'sem descricao'}
-Especificacoes: ${JSON.stringify(product.specs || {})}`;
-
-  try {
-    const model = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
-    const res = await fetch(`${GEMINI_URL}/${model}:generateContent`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-goog-api-key': apiKey
-      },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 400, responseMimeType: 'application/json' }
-      })
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Gemini API respondeu ${res.status}: ${errText}`);
-    }
-
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
-
-    return {
-      configured: true,
-      source: 'Google Gemini API',
-      generated_at: new Date().toISOString(),
-      curiosidade: parsed.curiosidade || null,
-      dica_de_uso: parsed.dica_de_uso || null,
-      publico_indicado: parsed.publico_indicado || null
-    };
-  } catch (err) {
-    return {
-      configured: true,
-      source: 'Google Gemini API (erro na chamada)',
-      generated_at: new Date().toISOString(),
-      erro: err.message,
-      curiosidade: null,
-      dica_de_uso: null,
-      publico_indicado: null
-    };
-  }
+function aiError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  err.expose = true;
+  return err;
 }
 
-module.exports = { fetchAiInsights };
+async function generateDescription(product) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw aiError(503, 'Integracao com IA pronta, mas GEMINI_API_KEY nao esta configurada no servidor.');
+  }
+
+  const prompt = `Voce e um redator de uma loja de eletronicos. Escreva a descricao comercial do produto abaixo,
+em portugues do Brasil, com 2 a 3 frases (no maximo 400 caracteres), destacando os principais
+diferenciais. Responda somente com o texto da descricao, sem titulo, aspas ou markdown.
+
+Produto: ${product.name} (marca ${product.brand || 'generica'}, categoria ${product.category || 'nao informada'})
+${product.description ? `Descricao atual (pode reescrever): ${product.description}` : ''}`;
+
+  const model = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
+  const res = await fetch(`${GEMINI_URL}/${model}:generateContent`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-goog-api-key': apiKey
+    },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 400 }
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`Gemini API respondeu ${res.status}: ${errText}`);
+    throw aiError(502, 'A IA nao conseguiu gerar a descricao agora. Tente novamente em instantes.');
+  }
+
+  const data = await res.json();
+  const text = (data?.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('').trim();
+  if (!text) throw aiError(502, 'A IA retornou uma resposta vazia. Tente novamente.');
+  return text;
+}
+
+module.exports = { generateDescription };
